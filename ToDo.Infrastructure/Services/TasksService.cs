@@ -7,13 +7,13 @@ using ToDo.Domain.Entities;
 
 namespace ToDo.Infrastructure.Services
 {
-    public class ServiceTasks : IServiceTasks
+    public class TasksService : ITasksService
     {
         private readonly ITasksRepository _repository;
         private readonly IUserRepository _userRepositoryl;
         private readonly IMapper _mapper;
 
-        public ServiceTasks(ITasksRepository repository, IMapper mapper, IUserRepository userRepositoryl)
+        public TasksService(ITasksRepository repository, IMapper mapper, IUserRepository userRepositoryl)
         {
             _repository = repository;
             _mapper = mapper;
@@ -32,9 +32,9 @@ namespace ToDo.Infrastructure.Services
             return await _repository.Delete(id);
         }
 
-        public IEnumerable<TasksReponse> GetAll(Guid idUser)
+        public async Task<IEnumerable<TasksReponse>> GetAll(Guid idUser)
         {
-            var user = _userRepositoryl.Get(idUser) ?? throw new ValidationException("User not exist");
+            var user = await _userRepositoryl.Get(idUser) ?? throw new ValidationException("User not exist");
             return _mapper.Map<IEnumerable<TasksReponse>>(_repository.GetAllByUser(idUser));
         }
 
@@ -45,6 +45,7 @@ namespace ToDo.Infrastructure.Services
 
         public async Task<bool> Update(TasksRequest task)
         {
+            task.IsEdit = true;
             var user = _userRepositoryl.Get(task.IdUser) ?? throw new ValidationException("User not exist");
             var newTask = new Tasks(task.Name, task.Description, task.IdUser);
             return await _repository.Update(newTask);

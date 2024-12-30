@@ -8,7 +8,7 @@ namespace ToDo.Application.Validators
         public UserRequestValidator()
         {
             RuleFor(x => x.Name)
-                .NotEmpty().WithMessage("Name is required.")
+                .NotNull().When(x => !x.IsLogin).WithMessage("Name is required.")
                 .Length(3, 100).WithMessage("Name must be between 3 and 100 characters.");
 
             RuleFor(x => x.Email)
@@ -17,6 +17,7 @@ namespace ToDo.Application.Validators
                 .EmailAddress().WithMessage("Invalid email format.");
 
             RuleFor(x => x.Password)
+                .MaximumLength(50).WithMessage("Password cannot be longer than 50 characters")
                 .NotNull().When(x => x.IsEdit).WithMessage("Password is required");
         }
     }

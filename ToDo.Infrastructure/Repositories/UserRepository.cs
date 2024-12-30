@@ -39,7 +39,7 @@ namespace ToDo.Infrastructure.Repositories
 
         public async Task<User> GetByEmail(string email) 
         {
-            return await _context.Users.FindAsync(email);
+            return await _context.Users.FirstOrDefaultAsync(x => x.Email == email);
         }
     }
 }

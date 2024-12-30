@@ -2,35 +2,32 @@
 
 # This stage is used when running from VS in fast mode (Default for Debug configuration)
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
-FROM mcr.microsoft.com/dotnet/skd:8.0 AS build
 USER $APP_UID
+WORKDIR /app
+EXPOSE 8080
+EXPOSE 8081
 
-# Copy the main project and library project files
+
+# This stage is used to build the service project
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+ARG BUILD_CONFIGURATION=Release
+WORKDIR /src
 COPY ["ApiToDo/ToDo.Api.csproj", "ApiToDo/"]
 COPY ["ToDo.Application/ToDo.Application.csproj", "ToDo.Application/"]
 COPY ["ToDo.Domain/ToDo.Domain.csproj", "ToDo.Domain/"]
 COPY ["ToDo.Infrastructure/ToDo.Infrastructure.csproj", "ToDo.Infrastructure/"]
-
-# Restore dependencies
-RUN dotnet restore "ApiToDo/ToDo.Api.csproj"
-
-# Copy all source files
+RUN dotnet restore "./ApiToDo/ToDo.Api.csproj"
 COPY . .
-
-# Build the solution
 WORKDIR "/src/ApiToDo"
-RUN dotnet build "ToDo.Api.csproj" -c $BUILD_CONFIGURATION -o /app/build
+RUN dotnet build "./ToDo.Api.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
-# Publish the application
+# This stage is used to publish the service project to be copied to the final stage
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "ToDo.Api.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "./ToDo.Api.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
-# Final stage for running the application
+# This stage is used in production or when running from VS in regular mode (Default when not using the Debug configuration)
 FROM base AS final
 WORKDIR /app
-EXPOSE 8080
-EXPOSE 8081
-ENV ASPNETCORE_URLS="http://0.0.0.0:8080;https://0.0.0.0:8081"
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "ToDo.Api.dll"]

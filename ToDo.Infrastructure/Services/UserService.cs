@@ -8,13 +8,13 @@ using static BCrypt.Net.BCrypt;
 
 namespace ToDo.Infrastructure.Services
 {
-    public class ServiceUser : IServiceUser
+    public class UserService : IUserService
     {
         private readonly IUserRepository _repository;
         private readonly IMapper _mapper;
         private const int WorkFactor = 12;
 
-        public ServiceUser(IUserRepository repository, IMapper mapper)
+        public UserService(IUserRepository repository, IMapper mapper)
         {
             _repository = repository;
             _mapper = mapper;
@@ -22,13 +22,15 @@ namespace ToDo.Infrastructure.Services
 
         public async Task<UserResponse> Create(UserRequest user)
         {
-            var userExist = _repository.GetByEmail(user.Email);
+            var userExist = await _repository.GetByEmail(user.Email);
             if (userExist != null)
                 throw new ValidationException("Email already belongs to another user");
 
             user.Password = HashPassword(user.Password, WorkFactor);
             var newUser = new User(user.Name, user.Email, user.Password);
-            return _mapper.Map<UserResponse>(await _repository.Create(newUser));
+            if (await _repository.Create(newUser))
+                return _mapper.Map<UserResponse>(await GetByEmail(user.Email));
+            throw new ValidationException("Failed save user");
         }
 
         public async Task<bool> Delete(Guid id)
@@ -46,6 +48,11 @@ namespace ToDo.Infrastructure.Services
         public async Task<bool> Update(User user)
         {
             return await _repository.Update(user);
+        }
+
+        public async Task<UserResponse> GetByEmail(string email)
+        {
+            return _mapper.Map<UserResponse>(await _repository.GetByEmail(email)) ?? throw new ValidationException("User not exist");
         }
     }
 }

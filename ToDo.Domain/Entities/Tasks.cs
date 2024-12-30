@@ -2,11 +2,11 @@
 {
     public class Tasks : Entity
     {
-        public Tasks(string name, string description, Guid idUSer)
+        public Tasks(string name, string description, Guid idUser)
         {
             Name = name;
             Description = description;
-            IdUser = idUSer;
+            IdUser = idUser;
         }
 
         public string Name { get; private set; }

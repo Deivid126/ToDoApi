@@ -17,6 +17,6 @@ namespace ToDo.Domain.Entities
         public Guid Id { get; private set; }
         public DateTime CreateDate { get; private set; }
         public DateTime UpdateDate { get; private set; }
-        public DateTime DeleteDate { get; private set; }
+        public DateTime? DeleteDate { get; private set; }
     }
 }

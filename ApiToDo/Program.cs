@@ -1,4 +1,11 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 using ToDo.Api.Setup;
+using ToDo.Application.Mapping;
+using ToDo.Infrastructure.Context;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,6 +25,30 @@ builder.Services.AddCors(opt =>
         .AllowAnyHeader());
 });
 
+builder.Services.AddLogging();
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = false,
+            ValidateAudience = false,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("7154d034-394b-4a4b-96d6-50eaad7cf9ab"))
+        };
+    });
+
+builder.Services.AddAutoMapper(typeof(DomainToDtoMapping));
+
+builder.Services.AddApiVersioning(options =>
+{
+    options.AssumeDefaultVersionWhenUnspecified = true;
+    options.DefaultApiVersion = new ApiVersion(1, 0);
+    options.ReportApiVersions = true;
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -27,11 +58,25 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI(c =>
     {
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "ToDo API V1");
-        c.RoutePrefix = string.Empty; // Set Swagger UI to the root URL (optional)
     });
 }
 
+using (var serviceScope = app.Services.GetRequiredService<IServiceScopeFactory>().CreateScope())
+{
+    var context = serviceScope.ServiceProvider.GetService<ToDoContext>();
+    var migrations = await context.Database.GetPendingMigrationsAsync();
+
+    if (migrations.Any())
+        await context.Database.MigrateAsync();
+}
+
 app.UseHttpsRedirection();
+
+app.UseCors();
+
+app.UseApiVersioning();
+
+app.UseAuthentication();
 
 app.UseAuthorization();
 
