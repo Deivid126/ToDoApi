@@ -9,9 +9,9 @@ namespace ToDo.Api.Controllers
     {
         private readonly IUserService _serviceUser;
         private readonly ITokenService _tokenService;
-        private readonly ILogger _logger;
+        private readonly ILogger<UserController> _logger;
 
-        public UserController(IUserService serviceUser, ITokenService tokenService, ILogger logger)
+        public UserController(IUserService serviceUser, ITokenService tokenService, ILogger<UserController> logger)
         {
             _serviceUser = serviceUser;
             _tokenService = tokenService;
@@ -24,8 +24,8 @@ namespace ToDo.Api.Controllers
         {
             try
             {
-                await _serviceUser.Create(user);
-                return CustomResponse((int)HttpStatusCode.Created, true);
+                var userNew = await _serviceUser.Create(user);
+                return CustomResponse((int)HttpStatusCode.Created, true, userNew);
             }
             catch (Exception ex)
             {
@@ -36,17 +36,18 @@ namespace ToDo.Api.Controllers
 
         [HttpPost]
         [Route("Login")]
-        public async Task<ActionResult> Login(UserRequest userRequest)
+        public async Task<ActionResult> Login(UserLoginRequest userLoginRequest)
         {
             try
             {
+                var userRequest = new UserRequest { IsLogin = true, Email = userLoginRequest.Email, Password = userLoginRequest.Password };
                 var token = await _tokenService.GenerateJwtToken(userRequest);
                 return CustomResponse((int)HttpStatusCode.OK, true, token);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.Message.ToString(), userRequest);
-                return CustomResponse((int)HttpStatusCode.BadRequest, false, ex);
+                _logger.LogError(ex.Message.ToString(), userLoginRequest);
+                return CustomResponse((int)HttpStatusCode.BadRequest, false, ex.Message.ToString());
             }
         }
 

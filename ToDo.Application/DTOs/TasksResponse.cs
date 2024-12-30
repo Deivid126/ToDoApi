@@ -1,6 +1,6 @@
 ﻿namespace ToDo.Application.DTOs
 {
-    public class TasksReponse
+    public class TasksResponse
     {
         public Guid Id { get; set; }
         public string Name { get; set; }

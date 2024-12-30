@@ -22,14 +22,20 @@ namespace ToDo.Infrastructure.Repositories
 
         public async Task<bool> Delete(Guid id)
         {
-            var task = await Get(id) ?? throw new ArgumentNullException(nameof(id));
+            var task = await Get(id) ?? throw new KeyNotFoundException($"Task with ID {id} not found.");
             task.UpdateActive(false);
+            task.UpdateDeleteDate();
             return await Update(task);
+        }
+
+        public async Task<Tasks> GetActive(Guid id)
+        {
+            return await _context.Tasks.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id && x.Active);
         }
 
         public async Task<Tasks> Get(Guid id)
         {
-            return await _context.Tasks.FirstOrDefaultAsync(x => x.Id == id && x.Active);
+            return await _context.Tasks.FindAsync(id);
         }
 
         public IEnumerable<Tasks> GetAllByUser(Guid userId)

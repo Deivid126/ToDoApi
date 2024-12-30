@@ -7,6 +7,5 @@ namespace ToDo.Application.Contracts.Services
     {
         Task<string> GenerateJwtToken(UserRequest user);
         void VerifyUserTokenIsEqualsUserRequest(ClaimsPrincipal user, Guid idUser);
-        Task<bool> VerifyUserPassword(UserRequest userRequest);
     }
 }

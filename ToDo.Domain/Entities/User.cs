@@ -12,13 +12,22 @@
         public string Name { get; private set; }
         public string Email { get; private set; }
         public string Password { get; private set; }
-        public bool Active { get; private set; }
         private List<Tasks> _tasks = new List<Tasks>();
         public IReadOnlyCollection<Tasks> tasks => _tasks;
 
-        public void SetAcitve(bool status) 
+        public void UpdateName(string name) 
         {
-            Active = status;
+            Name = name;
+        }
+
+        public void UpdateEmail(string email) 
+        { 
+            Email = email;
+        }
+
+        public void UpdatePassword(string password) 
+        {
+            Password = password;
         }
     }
 }

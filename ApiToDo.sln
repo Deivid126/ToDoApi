@@ -13,7 +13,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ToDo.Infrastructure", "Todo
 EndProject
 Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{AA02BEC0-B175-4290-87E4-F7F94B887589}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ToDo.Teste", "..\ToDo.Teste\ToDo.Teste.csproj", "{FEE9923F-40D6-43F3-8FB8-DEE81ECE8D9A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ToDo.Teste", "ToDo.Teste\ToDo.Teste.csproj", "{FEE9923F-40D6-43F3-8FB8-DEE81ECE8D9A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

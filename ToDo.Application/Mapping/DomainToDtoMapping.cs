@@ -15,8 +15,8 @@ namespace ToDo.Application.Mapping
                     Email = src.Email,
                     Name = src.Name
                 });
-            CreateMap<Tasks, TasksReponse>()
-                .ConstructUsing(src => new TasksReponse
+            CreateMap<Tasks, TasksResponse>()
+                .ConstructUsing(src => new TasksResponse
                 {
                     Id = src.Id,
                     Name = src.Name,

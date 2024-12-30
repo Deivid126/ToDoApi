@@ -19,7 +19,7 @@ namespace ToDo.Infrastructure.Services
         }
         public async Task<string> GenerateJwtToken(UserRequest user)
         {
-            if (!(await VerifyUserPassword(user)))
+            if (!(await _userRepository.VerifyUserAndPassword(user)))
                 throw new SecurityTokenValidationException("User or password not correct");
 
             var userBank = await _userRepository.GetByEmail(user.Email);
@@ -38,12 +38,6 @@ namespace ToDo.Infrastructure.Services
                 signingCredentials: creds);
 
             return new JwtSecurityTokenHandler().WriteToken(token);
-        }
-
-        public async Task<bool> VerifyUserPassword(UserRequest userRequest)
-        {
-            var user = await  _userRepository.GetByEmail(userRequest.Email) ?? throw new ArgumentException("User not exist");
-            return Verify(userRequest.Password, user.Password);
         }
 
         public void VerifyUserTokenIsEqualsUserRequest(ClaimsPrincipal user, Guid idUser) 

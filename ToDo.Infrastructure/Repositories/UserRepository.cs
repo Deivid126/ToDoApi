@@ -2,6 +2,8 @@
 using ToDo.Infrastructure.Context;
 using ToDo.Application.Contracts.Repositories;
 using ToDo.Domain.Entities;
+using ToDo.Application.DTOs;
+using static BCrypt.Net.BCrypt;
 
 namespace ToDo.Infrastructure.Repositories
 {
@@ -22,8 +24,15 @@ namespace ToDo.Infrastructure.Repositories
 
         public async Task<bool> Delete(Guid id)
         {
-            await _context.Tasks.Where(t => t.Id == id).ExecuteDeleteAsync();
-            return await _context.SaveChangesAsync() > 0;
+            var user = await GetActive(id) ?? throw new KeyNotFoundException($"User with ID {id} not found.");
+            user.UpdateActive(false);
+            user.UpdateDeleteDate();
+            return await Update(user);
+        }
+
+        public async Task<User> GetActive(Guid id)
+        {
+            return await _context.Users.FirstOrDefaultAsync(x => x.Id == id && x.Active);
         }
 
         public async Task<User> Get(Guid id)
@@ -39,7 +48,13 @@ namespace ToDo.Infrastructure.Repositories
 
         public async Task<User> GetByEmail(string email) 
         {
-            return await _context.Users.FirstOrDefaultAsync(x => x.Email == email);
+            return await _context.Users.FirstOrDefaultAsync(x => x.Email == email && x.Active);
+        }
+
+        public async Task<bool> VerifyUserAndPassword(UserRequest userRequest)
+        {
+            var user = await GetByEmail(userRequest.Email) ?? throw new ArgumentException("User not exist");
+            return Verify(userRequest.Password, user.Password);
         }
     }
 }

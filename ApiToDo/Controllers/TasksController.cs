@@ -9,11 +9,11 @@ namespace ToDo.Api.Controllers
     [Authorize]
     public class TasksController : ApiController
     {
-        public readonly ITasksService _serviceTasks;
+        private readonly ITasksService _serviceTasks;
         private readonly ITokenService _tokenService;
-        private readonly ILogger _logger;
+        private readonly ILogger<TasksController> _logger;
 
-        public TasksController(ITasksService serviceTasks, ITokenService tokenService, ILogger logger)
+        public TasksController(ITasksService serviceTasks, ITokenService tokenService, ILogger<TasksController> logger)
         {
             _serviceTasks = serviceTasks;
             _tokenService = tokenService;
@@ -26,8 +26,8 @@ namespace ToDo.Api.Controllers
             try
             {
                 _tokenService.VerifyUserTokenIsEqualsUserRequest(User, task.IdUser);
-                await _serviceTasks.Create(task);
-                return CustomResponse((int)HttpStatusCode.Created, true);
+                var newTask = await _serviceTasks.Create(task);
+                return CustomResponse((int)HttpStatusCode.Created, true, newTask);
             }
             catch (Exception ex)
             {
@@ -37,19 +37,19 @@ namespace ToDo.Api.Controllers
         }
 
         [HttpPut("[action]/{id}", Name = "UpdateTaskById")]
-        public async Task<IActionResult> UpdateTaskById(TasksRequest task, Guid id) 
+        public async Task<IActionResult> UpdateTaskById(TasksRequestEdit taskEdit, Guid id) 
         {
             try
             {
+                var task = new TasksRequest { Name = taskEdit.Name, Id = id, IdUser = taskEdit.IdUser, Description = taskEdit.Description, IsEdit = true};
                 _tokenService.VerifyUserTokenIsEqualsUserRequest(User, task.IdUser);
-                if (await _serviceTasks.Update(task))
-                    return CustomResponse((int)HttpStatusCode.OK, true);
+                var taskAtt = await _serviceTasks.Update(task);
+                return CustomResponse((int)HttpStatusCode.OK, true, taskAtt);
 
-                return CustomResponse((int)HttpStatusCode.BadRequest, false);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.Message.ToString(), task);
+                _logger.LogError(ex.Message.ToString(), taskEdit);
                 return CustomResponse((int)HttpStatusCode.BadRequest, false, ex.Message.ToString());
             }
 
@@ -98,7 +98,7 @@ namespace ToDo.Api.Controllers
                 _tokenService.VerifyUserTokenIsEqualsUserRequest(User, idUser);
                 var response = await _serviceTasks.GetAll(idUser);
                 if (response == null)
-                    return CustomResponse((int)HttpStatusCode.NotFound, false, new List<TasksReponse>());
+                    return CustomResponse((int)HttpStatusCode.NotFound, false, new List<TasksResponse>());
                 return CustomResponse((int)HttpStatusCode.OK, true, response);
             }
             catch (Exception ex)
@@ -107,6 +107,5 @@ namespace ToDo.Api.Controllers
                 return CustomResponse((int)HttpStatusCode.BadRequest, false, ex.Message.ToString());
             }
         }
-
     }
 }

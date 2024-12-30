@@ -10,7 +10,7 @@ using ToDo.Infrastructure.Context;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
+//builder.Services.AddLogging();
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -24,8 +24,6 @@ builder.Services.AddCors(opt =>
         .AllowAnyMethod()
         .AllowAnyHeader());
 });
-
-builder.Services.AddLogging();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
