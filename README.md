@@ -39,7 +39,7 @@ To run the application with Docker Compose, follow these steps:
 
     This command will build the Docker images and start the containers, including the API and the database.
 
-3. The application will be available at `http://localhost:5000`.
+3. The application will be available at `https://localhost:8081`.
 
 ### Running Tests
 
